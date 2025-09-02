@@ -39,7 +39,7 @@ export default function AddSchoolForm() {
     const res= await axios.post(`${apiUrl}/api/addSchool`,{formData,imageUrl:imageurl});
     alert(res.data.message);
     if(res.data.message=="School registered successfully"){
-      router.push("/showSchool")
+    router.push("/showSchool")
     }
     }catch(err){
       console.log("error in try block is ",err);
