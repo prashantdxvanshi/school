@@ -1,9 +1,10 @@
 
 import axios from 'axios'
 import React from 'react'
-
+export const dynamic = "force-dynamic";
 const showSchool =async () => {
-  const response= await axios.get("/api/showSchool")
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const response= await axios.get(`${apiUrl}/api/showSchool`)
   console.log("response from bakcend to frontend",response.data.message)
   console.log("data on frontend from backend is ",response.data.allregisteredschool)
   const allschool=response.data.allregisteredschool;

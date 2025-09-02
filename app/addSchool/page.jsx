@@ -2,7 +2,7 @@
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-
+export const dynamic = "force-dynamic";
 export default function AddSchoolForm() {
   const router=useRouter();
   const [formData, setFormData] = useState({
@@ -35,7 +35,8 @@ export default function AddSchoolForm() {
     
     console.log("form data is ",formData)
     try{
-    const res= await axios.post("http://localhost:3000/api/addSchool",{formData,imageUrl:imageurl});
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const res= await axios.post(`${apiUrl}/api/addSchool`,{formData,imageUrl:imageurl});
     alert(res.data.message);
     if(res.data.message=="School registered successfully"){
       router.push("/showSchool")
