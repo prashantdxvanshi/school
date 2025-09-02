@@ -10,9 +10,8 @@ const ShowSchool = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "";
-    axios
-      .get(`${apiUrl}/api/showSchool`)
+   
+    axios.get("/api/showSchool")
       .then((response) => {
         console.log("Response from backend:", response.data.message);
         setAllSchool(response.data.allregisteredschool || []);
