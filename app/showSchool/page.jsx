@@ -1,13 +1,14 @@
-
+"use client";
 import axios from 'axios'
-import React from 'react'
+import React, { useState } from 'react'
 export const dynamic = "force-dynamic";
 const showSchool =async () => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const[allschool,setallschool]=useState();
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
   const response= await axios.get(`${apiUrl}/api/showSchool`)
   console.log("response from bakcend to frontend",response.data.message)
   console.log("data on frontend from backend is ",response.data.allregisteredschool)
-  const allschool=response.data.allregisteredschool;
+  setallschool(response.data.allregisteredschool);
   return (
 <div className="min-h-screen w-full bg-gradient-to-r from-[#0f172a] via-[#1e293b] to-[#0f172a] py-12 px-6">
   <h1 className="text-5xl font-bold text-white text-center mb-12">
