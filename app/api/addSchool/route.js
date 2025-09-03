@@ -1,7 +1,7 @@
 
-import { createConnection } from "@/lib/db.js";
 import {NextResponse } from "next/server";
 import { z } from "zod";
+import { PrismaClient } from "@/app/generated/prisma";
 import {promises as fs} from 'fs';
 import { writeFile } from "fs/promises";
 import path from 'path';
@@ -40,21 +40,30 @@ const { name,address,city,state,contact,email_id}= body;
 // await writeFile(pathcreation, buffer);
 console.log("addschool end point")
 try{
-const db=await createConnection();
-console.log("db connection created ")
-const [rows] = await db.execute(
-    'SELECT * FROM addschool WHERE email_id = ? OR name = ?',
-    [email_id, name]
-  );
-
-  if (rows.length > 0) {
-    return NextResponse.json({ message: 'Email or Name already exists!' });
+const client =new PrismaClient();
+const existing = await client.school.findFirst({
+    where: {
+      OR: [{ email_id }, { name }]
+    }
+  });
+console.log("value of existing is ",existing)
+  if (existing) {
+     return NextResponse.json({ message: 'Email or Name already exists!' });
   }
+await client.school.create({
+  data:{
+  name:name,   
+  address:address,
+  city:city,  
+  state:state,
+  contact :contact,
+  image :imageurl,  
+  email_id :email_id
+  }
+})
 
- 
-
-const createSchool=await db.query( 'INSERT INTO addSchool (name, address, city, state, contact, email_id,imageurl) VALUES (?, ?, ?, ?, ?, ?,?)',[name, address, city, state, contact, email_id,imageurl])
-console.log("this is output of query",createSchool)
+  
+console.log("created new record");
 }catch(err){
   console.log("error in connection ", err)
 }

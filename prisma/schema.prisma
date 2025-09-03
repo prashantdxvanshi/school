@@ -1,0 +1,27 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model School {
+  id        Int      @id @default(autoincrement()) // AUTO_INCREMENT ID
+  name      String   // School name
+  address   String   // School address
+  city      String   // City
+  state     String   // State
+  contact   String   // Contact number
+  image     String   // Image path or URL
+  email_id  String   // Email ID
+  
+}

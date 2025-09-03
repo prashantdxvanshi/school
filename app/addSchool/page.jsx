@@ -37,6 +37,7 @@ export default function AddSchoolForm() {
     try{
     
     const res= await axios.post("/api/addSchool",{formData,imageUrl:imageurl});
+    console.log("message from backend to frontend is ",res.data.message)
     alert(res.data.message);
     if(res.data.message=="School registered successfully"){
     router.push("/showSchool")
