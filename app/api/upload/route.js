@@ -1,33 +1,18 @@
-import { NextResponse } from "next/server";
-import { writeFile } from "fs/promises";
+import fs from "fs";
 import path from "path";
+import axios from "axios";
 
 export async function POST(req) {
-  try {
-    const data = await req.formData();
-    const file = data.get("file");
+  const { imageUrl } = await req.json();
 
-    if (!file) {
-      return NextResponse.json({ message: "No file found", success: false });
-    }
+  // Download image from Cloudinary to local folder
+  const response = await axios.get(imageUrl, { responseType: "arraybuffer" });
+  const fileName = `${Date.now()}.jpg`;
+  const filePath = path.join(process.cwd(), "public/uploads", fileName);
 
-    // Convert file to buffer
-    const byteData = await file.arrayBuffer();
-    const buffer = Buffer.from(byteData);
+  fs.writeFileSync(filePath, Buffer.from(response.data, "binary"));
 
-    // Save in public/uploads folder
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    const filePath = path.join(uploadDir, file.name);
-
-    await writeFile(filePath, buffer);
-
-    return NextResponse.json({
-      message: "File uploaded successfully",
-      success: true,
-      path: `/uploads/${file.name}`,
-    });
-  } catch (error) {
-    console.error("Upload error:", error);
-    return NextResponse.json({ message: "Upload failed", error: error.message, success: false }, { status: 500 });
-  }
+  return new Response(JSON.stringify({ localPath: `/uploads/${fileName}` }), {
+    status: 200,
+  });
 }

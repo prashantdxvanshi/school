@@ -60,8 +60,6 @@ await prisma.school.create({
   email_id :email_id
   }
 })
-
-  
 console.log("created new record");
 }catch(err){
   console.log("error in connection ", err)

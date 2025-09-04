@@ -1,12 +1,17 @@
 "use client";
 
 import axios from "axios";
+import { CldUploadWidget } from "next-cloudinary";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useRecoilState, useRecoilValue } from "recoil";
+
 export const dynamic = "force-dynamic";
 export default function AddSchoolForm() {
   const router = useRouter();
+  const [publicid, setpublicid] = useState("");
+  const [cloudUrl, setCloudUrl] = useState("");
+  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -16,8 +21,6 @@ export default function AddSchoolForm() {
     email_id: "",
   });
 
-  const [file, setfile] = useState();
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -26,36 +29,28 @@ export default function AddSchoolForm() {
 
   const handlesubmit = async (e) => {
     e.preventDefault();
-
-    console.log("form data is ", formData);
+    setLoading(true);
     try {
-      if (!file) {
-        alert("Please select a file first!");
-        return;
+      try {
+        await axios.post("/api/upload", { imageUrl: cloudUrl });
+        console.log("Tried saving to local folder (optional).");
+      } catch (err) {
+        console.warn("Local upload failed (ignored):", err.message);
       }
 
-      const data = new FormData();
-      data.append("file", file);
-
-      const result = await axios.post("/api/upload", data, {
-        headers: { "Content-Type": "multipart/form-data" },
+      const res = await axios.post("/api/addSchool", {
+        formData,
+        imageUrl: publicid,
       });
-      console.log("result of the upload post is ", result);
-      if (result.data.success) {
-        const fileurl = result.data.path; // This comes from backend response
-        const res = await axios.post("/api/addSchool", {
-          formData,
-          imageUrl: fileurl,
-        });
-        console.log("message from backend to frontend is ", res.data.message);
-        alert(res.data.message);
-        if (res.data.message == "School registered successfully") {
-          router.push("/showSchool");
-        }
+      alert(res.data.message);
+      if (res.data.message == "School registered successfully") {
+        router.push("/showSchool");
       }
     } catch (err) {
       console.log("error in try block is ", err);
-    }
+    }finally {
+    setLoading(false); // stop loading
+  }
   };
   return (
     <div className="w-screen h-screen flex items-center justify-center bg-gradient-to-r from-[#0f172a] via-[#1e293b] to-[#0f172a]">
@@ -107,12 +102,28 @@ export default function AddSchoolForm() {
             onChange={handleChange}
             className="p-4 rounded-xl bg-white/20 text-white placeholder-white/70 focus:ring-4 focus:ring-pink-400 focus:outline-none"
           />
-          <input
-            type="file"
-            name="file"
-            onChange={(e) => setfile(e.target.files[0])}
-            className="p-4 rounded-xl bg-white/20 text-white/70 focus:outline-none"
-          />
+          <CldUploadWidget
+            uploadPreset="next_cloudinary_app"
+            onSuccess={({ event, info }) => {
+              console.log("info is ", info);
+              if (event === "success") {
+                setpublicid(info.public_id);
+                setCloudUrl(info.secure_url);
+              }
+            }}
+          >
+            {({ open }) => {
+              return (
+                <button
+                  className=" text-white/70 bg-white/20 rounded-2xl"
+                  type="button"
+                  onClick={() => open()}
+                >
+               ⭳  Upload an Image
+                </button>
+              );
+            }}
+          </CldUploadWidget>
 
           <input
             type="email"
@@ -126,7 +137,7 @@ export default function AddSchoolForm() {
             type="submit"
             className="col-span-2 p-4 mt-4 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold shadow-lg hover:shadow-2xl transform hover:scale-[1.03] transition-all duration-500"
           >
-            Submit
+            {loading ? "Submitting..." : "Submit"}
           </button>
         </form>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import axios from "axios";
+import { CldImage } from "next-cloudinary";
 import React, { useEffect, useState } from "react";
 
 export const dynamic = "force-dynamic";
@@ -10,8 +11,8 @@ const ShowSchool = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-   
-    axios.get("/api/showSchool")
+    axios
+      .get("/api/showSchool")
       .then((response) => {
         console.log("Response from backend:", response.data.message);
         setAllSchool(response.data.allregisteredschool || []);
@@ -44,11 +45,15 @@ const ShowSchool = () => {
               className="bg-white rounded-2xl shadow-md hover:shadow-xl transition-all duration-500 ease-in-out transform hover:-translate-y-2 hover:scale-105 flex flex-col overflow-hidden h-[450px]"
             >
               <div className="h-48 w-full overflow-hidden">
-                <img
-                  src={school.image}
-                  alt={school.name}
+                <CldImage
                   className="h-full w-full object-cover transition-transform duration-500 ease-in-out hover:scale-110"
+                  width="960"
+                  height="600"
+                  src={school.image}
+                  sizes="100vw"
+                  alt="Description of my image"
                 />
+                
               </div>
 
               <div className="p-5 flex flex-col justify-between flex-1">
