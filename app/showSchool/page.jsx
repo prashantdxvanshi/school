@@ -45,7 +45,7 @@ const ShowSchool = () => {
             >
               <div className="h-48 w-full overflow-hidden">
                 <img
-                  src={school.imageurl}
+                  src={school.image}
                   alt={school.name}
                   className="h-full w-full object-cover transition-transform duration-500 ease-in-out hover:scale-110"
                 />

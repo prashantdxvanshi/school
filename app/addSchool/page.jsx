@@ -1,10 +1,12 @@
 "use client";
+
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useRecoilState, useRecoilValue } from "recoil";
 export const dynamic = "force-dynamic";
 export default function AddSchoolForm() {
-  const router=useRouter();
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: "",
     address: "",
@@ -13,41 +15,48 @@ export default function AddSchoolForm() {
     contact: "",
     email_id: "",
   });
- const[imageurl,setimageurl]=useState(null);
- const[file,setfile]=useState(null);
+
+  const [file, setfile] = useState();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-   
   };
-  const handlefileChange = (e) => {
-  const selectedFile = e.target.files[0];
-  setfile(selectedFile);
-  const url = URL.createObjectURL(selectedFile);
-  setimageurl(url);
-  };
-  
-   
-  console.log("form data is ",formData)
+
+  console.log("form data is ", formData);
 
   const handlesubmit = async (e) => {
     e.preventDefault();
-    
-    console.log("form data is ",formData)
-    try{
-    
-    const res= await axios.post("/api/addSchool",{formData,imageUrl:imageurl});
-    console.log("message from backend to frontend is ",res.data.message)
-    alert(res.data.message);
-    if(res.data.message=="School registered successfully"){
-    router.push("/showSchool")
-    }
-    }catch(err){
-      console.log("error in try block is ",err);
-    }
 
-   
-  }
+    console.log("form data is ", formData);
+    try {
+      if (!file) {
+        alert("Please select a file first!");
+        return;
+      }
+
+      const data = new FormData();
+      data.append("file", file);
+
+      const result = await axios.post("/api/upload", data, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+      console.log("result of the upload post is ", result);
+      if (result.data.success) {
+        const fileurl = result.data.path; // This comes from backend response
+        const res = await axios.post("/api/addSchool", {
+          formData,
+          imageUrl: fileurl,
+        });
+        console.log("message from backend to frontend is ", res.data.message);
+        alert(res.data.message);
+        if (res.data.message == "School registered successfully") {
+          router.push("/showSchool");
+        }
+      }
+    } catch (err) {
+      console.log("error in try block is ", err);
+    }
+  };
   return (
     <div className="w-screen h-screen flex items-center justify-center bg-gradient-to-r from-[#0f172a] via-[#1e293b] to-[#0f172a]">
       <div className="relative w-full max-w-2xl p-10 rounded-3xl bg-gradient-to-br from-[#1e293b] to-[#334155] shadow-[0_10px_40px_rgba(0,0,0,0.5)] border border-white/20 transform hover:scale-[1.02] transition-transform duration-500">
@@ -98,16 +107,13 @@ export default function AddSchoolForm() {
             onChange={handleChange}
             className="p-4 rounded-xl bg-white/20 text-white placeholder-white/70 focus:ring-4 focus:ring-pink-400 focus:outline-none"
           />
-        
           <input
             type="file"
-            name="image"
-           
-            value={formData.image}
-            onChange={handlefileChange}
-            className="p-4 rounded-xl bg-white/20 text-white/70  focus:outline-none"
+            name="file"
+            onChange={(e) => setfile(e.target.files[0])}
+            className="p-4 rounded-xl bg-white/20 text-white/70 focus:outline-none"
           />
-            
+
           <input
             type="email"
             name="email_id"
@@ -119,12 +125,10 @@ export default function AddSchoolForm() {
           <button
             type="submit"
             className="col-span-2 p-4 mt-4 rounded-xl bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold shadow-lg hover:shadow-2xl transform hover:scale-[1.03] transition-all duration-500"
-            
           >
             Submit
           </button>
         </form>
-       
       </div>
     </div>
   );

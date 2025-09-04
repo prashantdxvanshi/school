@@ -1,10 +1,9 @@
 
+import { prisma } from "@/lib/prisma";
 import {NextResponse } from "next/server";
 import { z } from "zod";
-import { PrismaClient } from "@/app/generated/prisma";
-import {promises as fs} from 'fs';
-import { writeFile } from "fs/promises";
-import path from 'path';
+
+
 const zodBodySchema = z.object({
   name: z.string().min(3).max(100),
   address: z.string().min(3).max(100),
@@ -40,8 +39,8 @@ const { name,address,city,state,contact,email_id}= body;
 // await writeFile(pathcreation, buffer);
 console.log("addschool end point")
 try{
-const client =new PrismaClient();
-const existing = await client.school.findFirst({
+
+const existing = await prisma.school.findFirst({
     where: {
       OR: [{ email_id }, { name }]
     }
@@ -50,7 +49,7 @@ console.log("value of existing is ",existing)
   if (existing) {
      return NextResponse.json({ message: 'Email or Name already exists!' });
   }
-await client.school.create({
+await prisma.school.create({
   data:{
   name:name,   
   address:address,
@@ -66,6 +65,9 @@ await client.school.create({
 console.log("created new record");
 }catch(err){
   console.log("error in connection ", err)
+  return NextResponse.json({
+    message:"Internal server error(connection to database)"
+  })
 }
 return NextResponse.json({
     message:"School registered successfully",
